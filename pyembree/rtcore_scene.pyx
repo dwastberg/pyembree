@@ -34,11 +34,12 @@ cdef class EmbreeScene:
 
     def run(self, np.ndarray[np.float32_t, ndim=2] vec_origins,
                   np.ndarray[np.float32_t, ndim=2] vec_directions,
-                  dists=None,query='INTERSECT',output=None):
+                  dists=None,nears=None,query='INTERSECT',output=None):
         cdef int nv = vec_origins.shape[0]
         cdef int vo_i, vd_i, vd_step
         cdef np.ndarray[np.int32_t, ndim=1] intersect_ids
         cdef np.ndarray[np.float32_t, ndim=1] tfars
+        cdef np.ndarray[np.float32_t, ndim=1] tnears
         cdef rayQueryType query_type
 
         if query == 'INTERSECT':
@@ -60,6 +61,15 @@ cdef class EmbreeScene:
             tfars.fill(dists)
         else:
             tfars = dists
+
+        if nears is None:
+            tnears = np.empty(nv, 'float32')
+            tnears.fill(0)
+        elif isinstance(nears, numbers.Number):
+            tnears = np.empty(nv, 'float32')
+            tnears.fill(nears)
+        else:
+            tnears = nears
 
         if output:
             u = np.empty(nv, dtype="float32")
